@@ -2,6 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import { BudgetsProvider } from "./context/BudgetsContext";
+
 import App from "./App";
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(
+  <BudgetsProvider>
+    <App />
+  </BudgetsProvider>,
+  document.getElementById("root")
+);
