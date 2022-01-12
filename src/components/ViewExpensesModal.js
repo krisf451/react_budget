@@ -1,9 +1,12 @@
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Stack } from "react-bootstrap";
 import { UNCATEGORIZED_BUDGET_ID, useBudgets } from "../context/BudgetsContext";
+import { currencyFormatter } from "../utils";
 
-export default function ViewExpensesModal({ show, handleClose, budgetId }) {
+export default function ViewExpensesModal({ handleClose, budgetId }) {
   const { getBudgetExpenses, budgets, deleteBudget, deleteExpense } =
     useBudgets();
+
+  const expenses = getBudgetExpenses(budgetId);
 
   const budget =
     UNCATEGORIZED_BUDGET_ID === budgetId
@@ -11,34 +14,43 @@ export default function ViewExpensesModal({ show, handleClose, budgetId }) {
       : budgets.find((b) => b.id === budgetId);
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={budgetId != null} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>
           <Stack direction="horizontal" gap="2">
-            <div>Expenses - {budget.name}</div>
+            <div>Expenses - {budget?.name}</div>
+            {budgetId !== UNCATEGORIZED_BUDGET_ID && (
+              <Button
+                variant="outline-danger"
+                onClick={() => {
+                  deleteBudget(budget);
+                  handleClose();
+                }}
+              >
+                Delete
+              </Button>
+            )}
           </Stack>
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form.Group className="mb-3" controlId="name">
-          <Form.Label>Name</Form.Label>
-          <Form.Control ref={nameRef} type="text" required />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="max">
-          <Form.Label>Maximum Spending</Form.Label>
-          <Form.Control
-            ref={maxRef}
-            type="number"
-            required
-            min={0}
-            step={0.01}
-          />
-        </Form.Group>
-        <div className="d-flex justify-content-end">
-          <Button type="submit" variant="primary">
-            Add
-          </Button>
-        </div>
+        <Stack direction="vertical" gap="3">
+          {expenses.map((expense) => (
+            <Stack direction="horizontal" gap="2" key={expense.id}>
+              <div className="me-auto fs-4">{expense.description}</div>
+              <div className="fs-5">
+                {currencyFormatter.format(expense.amount)}
+              </div>
+              <Button
+                size="sm"
+                variant="outline-danger"
+                onClick={() => deleteExpense(expense)}
+              >
+                &times;
+              </Button>
+            </Stack>
+          ))}
+        </Stack>
       </Modal.Body>
     </Modal>
   );
